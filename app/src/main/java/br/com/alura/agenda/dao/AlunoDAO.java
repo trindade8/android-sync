@@ -29,7 +29,9 @@ public class AlunoDAO extends SQLiteOpenHelper {
                 "telefone TEXT, " +
                 "site TEXT, " +
                 "nota REAL, " +
-                "caminhoFoto TEXT);";
+                "caminhoFoto TEXT," +
+                "sincronizado INT" +
+                ");";
         db.execSQL(sql);
     }
 
@@ -41,14 +43,17 @@ public class AlunoDAO extends SQLiteOpenHelper {
                 sql = "ALTER TABLE Alunos ADD COLUMN caminhoFoto TEXT";
                 db.execSQL(sql); // indo para versao 2
             case 2:
-                String criandoTabelaNova = "CREATE TABLE Alunos_novo " +
+                String criandoTabelaNova =
+                        "CREATE TABLE Alunos_novo " +
                         "(id CHAR(36) PRIMARY KEY," +
                         "nome TEXT NOT NULL, " +
                         "endereco TEXT, " +
                         "telefone TEXT, " +
                         "site TEXT, " +
                         "nota REAL, " +
-                        "caminhoFoto TEXT);";
+                                "caminhoFoto TEXT," +
+                                "sincronizado INT" +
+                                ");";
                 db.execSQL(criandoTabelaNova);
 
                 String inserindoAlunosNaTabelaNova = "INSERT INTO Alunos_novo " +
@@ -78,6 +83,10 @@ public class AlunoDAO extends SQLiteOpenHelper {
                         alunos) {
                     db.execSQL(atualizaIdDoAluno, new String[]{geraUUID(), aluno.getId()});
                 }
+            case 4:
+                String adicionaCampoSincronizado =
+                        "ALTER TABLE Alunos ADD COLUMN sincronizado DEFAULT 0";
+                db.execSQL(adicionaCampoSincronizado);
 
         }
 
@@ -110,6 +119,7 @@ public class AlunoDAO extends SQLiteOpenHelper {
         dados.put("site", aluno.getSite());
         dados.put("nota", aluno.getNota());
         dados.put("caminhoFoto", aluno.getCaminhoFoto());
+        dados.put("sincronizado", aluno.getSincronizado());
         return dados;
     }
 
@@ -117,7 +127,6 @@ public class AlunoDAO extends SQLiteOpenHelper {
         String sql = "SELECT * FROM Alunos;";
         SQLiteDatabase db = getReadableDatabase();
         Cursor c = db.rawQuery(sql, null);
-
         List<Aluno> alunos = populaAlunos(c);
         c.close();
 
@@ -136,7 +145,7 @@ public class AlunoDAO extends SQLiteOpenHelper {
             aluno.setSite(c.getString(c.getColumnIndex("site")));
             aluno.setNota(c.getDouble(c.getColumnIndex("nota")));
             aluno.setCaminhoFoto(c.getString(c.getColumnIndex("caminhoFoto")));
-
+            aluno.setSincronizado(c.getInt(c.getColumnIndex("sincronizado")));
             alunos.add(aluno);
         }
         return alunos;
