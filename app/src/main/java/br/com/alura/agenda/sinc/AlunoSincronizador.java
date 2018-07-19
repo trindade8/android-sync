@@ -5,9 +5,12 @@ import android.util.Log;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.util.List;
+
 import br.com.alura.agenda.dao.AlunoDAO;
 import br.com.alura.agenda.dto.AlunoSync;
 import br.com.alura.agenda.event.AtualizaListaAlunoEvent;
+import br.com.alura.agenda.modelo.Aluno;
 import br.com.alura.agenda.preferences.AlunoPreferences;
 import br.com.alura.agenda.retrofit.RetrofitInicializador;
 import retrofit2.Call;
@@ -37,6 +40,10 @@ public class AlunoSincronizador {
                 {
                     BuscaAlunos();
                 }
+    }
+
+    public void SincronizaAlunosInternos() {
+        sincronizaAlunosInternos();
     }
 
     private void BuscaNovosAlunos() {
@@ -74,6 +81,26 @@ public class AlunoSincronizador {
             public void onFailure(Call<AlunoSync> call, Throwable t) {
                 Log.e("onFailure chamado", t.getMessage());
                 bus.post(new AtualizaListaAlunoEvent());
+            }
+        });
+    }
+
+    private void sincronizaAlunosInternos() {
+        final AlunoDAO dao = new AlunoDAO(context);
+        final List<Aluno> alunos = dao.listaNaoSicronizados();
+        Call<AlunoSync> call = new RetrofitInicializador().getAlunoService().atualiza(alunos);
+
+        call.enqueue(new Callback<AlunoSync>() {
+            @Override
+            public void onResponse(Call<AlunoSync> call, Response<AlunoSync> response) {
+                List<Aluno> alunos1 = response.body().getAlunos();
+                dao.sincroniza(alunos1);
+                dao.close();
+            }
+
+            @Override
+            public void onFailure(Call<AlunoSync> call, Throwable t) {
+
             }
         });
     }

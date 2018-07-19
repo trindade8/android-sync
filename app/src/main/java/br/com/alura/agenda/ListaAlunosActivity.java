@@ -61,6 +61,7 @@ public class ListaAlunosActivity extends AppCompatActivity {
             @Override
             public void onRefresh() {
                 sincronizador.buscaTodos();
+                sincronizador.SincronizaAlunosInternos();
             }
         });
 
@@ -86,6 +87,7 @@ public class ListaAlunosActivity extends AppCompatActivity {
 
         registerForContextMenu(listaAlunos);
         sincronizador.buscaTodos();
+        sincronizador.SincronizaAlunosInternos();
 
 
     }
@@ -105,7 +107,7 @@ public class ListaAlunosActivity extends AppCompatActivity {
 
         for (Aluno aluno :
                 alunos) {
-            Log.i("Alunosync", String.valueOf(aluno.getSincronizado()));
+            Log.i("Alunosync", "Aluno :" + aluno.toString() + ":" + String.valueOf(aluno.getSincronizado()).toString());
         }
         dao.close();
         AlunosAdapter adapter = new AlunosAdapter(this, alunos);
